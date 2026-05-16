@@ -25,7 +25,7 @@ const AdminHotelsScreen = ({ navigation }: any) => {
     try {
       setLoading(true);
       const data = await adminHotelAPI.getAll();
-      setHotels(data);
+      setHotels(data.items);
     } catch (error) {
       Alert.alert('Помилка', 'Не вдалося завантажити готелі');
     } finally {
@@ -76,7 +76,7 @@ const AdminHotelsScreen = ({ navigation }: any) => {
       </Text>
 
       <View style={styles.hotelMeta}>
-        <Text style={styles.metaItem}>🛏️ {item.rooms.length} номерів</Text>
+        <Text style={styles.metaItem}>🛏️ {item.rooms?.length || 0} номерів</Text>
         <Text style={styles.metaItem}>💬 {item.reviewCount} відгуків</Text>
         <Text style={styles.metaItem}>📍 {item.distanceToCenterKm}км від центра</Text>
       </View>
@@ -130,7 +130,6 @@ const AdminHotelsScreen = ({ navigation }: any) => {
         data={filteredHotels}
         renderItem={renderHotelItem}
         keyExtractor={(item) => item.id}
-        scrollEnabled={false}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <Text style={styles.emptyText}>Готелі не знайдені</Text>

@@ -21,11 +21,16 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  const [phone, setPhone] = useState('');
+  const [country, setCountry] = useState('');
+  const [birthday, setBirthday] = useState('');
+
   const { register, isLoading, error, clearError } = useAuth();
 
   const handleRegister = async () => {
     if (!fullName || !email || !password || !confirmPassword) {
-      Alert.alert('Помилка', 'Будь ласка заповніть всі поля');
+      Alert.alert('Помилка', 'Будь ласка заповніть обов\'язкові поля');
       return;
     }
 
@@ -34,15 +39,9 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert('Помилка', 'Пароль повинен містити мінімум 6 символів');
-      return;
-    }
-
     try {
       clearError();
-      await register(fullName, email, password);
-      navigation.replace('Home');
+      await register(fullName, email, password, phone, country, birthday);
     } catch (err: any) {
       Alert.alert('Помилка реєстрації', err.message);
     }
@@ -60,7 +59,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
         <TextInput
           style={styles.input}
-          placeholder="Повне ім'я"
+          placeholder="Повне ім'я *"
           placeholderTextColor="#94A3B8"
           value={fullName}
           onChangeText={setFullName}
@@ -69,7 +68,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder="Email *"
           placeholderTextColor="#94A3B8"
           value={email}
           onChangeText={setEmail}
@@ -80,7 +79,35 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
         <TextInput
           style={styles.input}
-          placeholder="Пароль"
+          placeholder="Телефон"
+          placeholderTextColor="#94A3B8"
+          value={phone}
+          onChangeText={setPhone}
+          editable={!isLoading}
+          keyboardType="phone-pad"
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Країна"
+          placeholderTextColor="#94A3B8"
+          value={country}
+          onChangeText={setCountry}
+          editable={!isLoading}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Дата народження (YYYY-MM-DD)"
+          placeholderTextColor="#94A3B8"
+          value={birthday}
+          onChangeText={setBirthday}
+          editable={!isLoading}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Пароль *"
           placeholderTextColor="#94A3B8"
           value={password}
           onChangeText={setPassword}
@@ -90,15 +117,13 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
         <TextInput
           style={styles.input}
-          placeholder="Повторіть пароль"
+          placeholder="Повторіть пароль *"
           placeholderTextColor="#94A3B8"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           editable={!isLoading}
           secureTextEntry
         />
-
-        {error && <Text style={styles.errorText}>{error}</Text>}
 
         <TouchableOpacity
           style={[styles.button, isLoading && styles.buttonDisabled]}
@@ -124,73 +149,16 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  content: {
-    padding: 24,
-  },
-  backButton: {
-    fontSize: 16,
-    color: '#2563EB',
-    fontWeight: '600',
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
-    marginBottom: 32,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    fontSize: 16,
-    color: '#111827',
-    backgroundColor: '#F9FAFB',
-  },
-  errorText: {
-    color: '#EF4444',
-    fontSize: 14,
-    marginBottom: 16,
-  },
-  button: {
-    backgroundColor: '#2563EB',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 24,
-    paddingBottom: 32,
-  },
-  footerText: {
-    color: '#6B7280',
-    fontSize: 14,
-  },
-  linkText: {
-    color: '#2563EB',
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
+  content: { padding: 24 },
+  backButton: { fontSize: 16, color: '#2563EB', fontWeight: '600', marginBottom: 24 },
+  title: { fontSize: 32, fontWeight: '700', color: '#111827', marginBottom: 8 },
+  subtitle: { fontSize: 16, color: '#6B7280', marginBottom: 32 },
+  input: { borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 16, marginBottom: 16, fontSize: 16, color: '#111827', backgroundColor: '#F9FAFB' },
+  button: { backgroundColor: '#2563EB', borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8 },
+  buttonDisabled: { opacity: 0.7 },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 24, paddingBottom: 32 },
+  footerText: { color: '#6B7280', fontSize: 14 },
+  linkText: { color: '#2563EB', fontSize: 14, fontWeight: '600' },
 });

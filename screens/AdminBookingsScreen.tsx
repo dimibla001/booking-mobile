@@ -23,7 +23,7 @@ const AdminBookingsScreen = () => {
     try {
       setLoading(true);
       const data = await adminBookingAPI.getAll(statusFilter);
-      setBookings(data);
+      setBookings(data.items);
     } catch (error) {
       Alert.alert('Помилка', 'Не вдалося завантажити бронювання');
     } finally {
@@ -41,8 +41,8 @@ const AdminBookingsScreen = () => {
             await adminBookingAPI.cancel(bookingId);
             loadBookings();
             Alert.alert('Успіх', 'Бронювання скасовано');
-          } catch (error) {
-            Alert.alert('Помилка', 'Не вдалося скасувати бронювання');
+          } catch (error: any) {
+            Alert.alert('Помилка', error.message || 'Не вдалося скасувати бронювання');
           }
         },
       },

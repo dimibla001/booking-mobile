@@ -23,10 +23,6 @@ export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   const { user, logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigation.replace('Login');
-      return;
-    }
     loadProfile();
   }, []);
 
@@ -50,7 +46,6 @@ export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
         text: 'Так',
         onPress: async () => {
           await logout();
-          navigation.replace('Login');
         },
       },
     ]);
@@ -75,7 +70,7 @@ export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Text style={styles.backButton}>← Назад</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Хай мій профіль</Text>
+          <Text style={styles.title}>Профіль</Text>
         </View>
 
         {error && (
@@ -129,21 +124,33 @@ export const ProfileScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
 
-            {displayProfile.favorites && displayProfile.favorites.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Улюблені готелі</Text>
-                <Text style={styles.favoriteCount}>
-                  Всього: {displayProfile.favorites.length}
-                </Text>
-              </View>
-            )}
-
             <View style={styles.actions}>
               <TouchableOpacity
                 onPress={() => navigation.navigate('MyBookings')}
                 style={styles.actionButton}
               >
                 <Text style={styles.actionButtonText}>Мої бронювання</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate('HotelSubmission')}
+                style={[styles.actionButton, { backgroundColor: '#008009' }]}
+              >
+                <Text style={styles.actionButtonText}>Зареєструвати свій готель</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate('OwnerBookings')}
+                style={[styles.actionButton, { backgroundColor: '#111827' }]}
+              >
+                <Text style={styles.actionButtonText}>Бронювання моїх готелів</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate('ChatList')}
+                style={[styles.actionButton, { backgroundColor: '#006ce4' }]}
+              >
+                <Text style={styles.actionButtonText}>💬 Повідомлення</Text>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
@@ -268,10 +275,6 @@ const styles = StyleSheet.create({
   infoValue: {
     fontWeight: '600',
     color: '#111827',
-  },
-  favoriteCount: {
-    color: '#6B7280',
-    fontSize: 14,
   },
   actions: {
     paddingHorizontal: 16,

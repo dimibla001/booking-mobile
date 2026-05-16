@@ -12,6 +12,7 @@ import { adminUserAPI, AdminUserDto } from '../services/api';
 
 const AdminUsersScreen = () => {
   const [users, setUsers] = useState<AdminUserDto[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +23,8 @@ const AdminUsersScreen = () => {
     try {
       setLoading(true);
       const data = await adminUserAPI.getAll();
-      setUsers(data);
+      setUsers(data.items);
+      setTotalCount(data.totalCount);
     } catch (error) {
       Alert.alert('Помилка', 'Не вдалося завантажити користувачів');
     } finally {
@@ -165,7 +167,7 @@ const AdminUsersScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Управління користувачами</Text>
-        <Text style={styles.subtitle}>{users.length} користувачів</Text>
+        <Text style={styles.subtitle}>{totalCount} користувачів</Text>
       </View>
 
       <FlatList

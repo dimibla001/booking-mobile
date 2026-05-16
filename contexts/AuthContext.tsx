@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { authAPI, getToken, setToken, clearToken, UserProfileDto } from '../services/api';
+import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
+import { authAPI, getToken, setToken, clearToken, UserProfileDto, userAPI } from '../services/api';
 
 interface AuthContextType {
   user: UserProfileDto | null;
@@ -7,6 +7,7 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
   register: (fullName: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
@@ -24,6 +25,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       try {
         const token = getToken();
         if (token) {
+          const profile = await userAPI.getProfile();
+          setUser(profile);
         }
       } catch (err) {
         console.error('Auth init error:', err);
@@ -52,7 +55,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const register = async (fullName: string, email: string, password: string) => {
+  const loginWithGoogle = async (idToken: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await authAPI.loginWithGoogle(idToken);
+      setToken(response.accessToken);
+      setUser(response.user);
+    } catch (err: any) {
+      const message = err.message || 'Помилка входу через Google';
+      setError(message);
+      throw new Error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const register = async (fullName: string, email: string, password: string, phone?: string, country?: string, birthday?: string) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -60,14 +79,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         fullName,
         email,
         password,
+        phone,
+        country,
+        birthday,
         preferredCurrency: 'USD',
       });
       setToken(response.accessToken);
       setUser(response.user);
     } catch (err: any) {
-      const message = err.message || 'Помилка реєстрації';
-      setError(message);
-      throw new Error(message);
+      setError(err.message);
+      throw new Error(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -93,6 +114,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     isLoading,
     error,
     login,
+    loginWithGoogle,
     register,
     logout,
     clearError,
@@ -102,7 +124,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 };
 
 export const useAuth = (): AuthContextType => {
-  const context = React.useContext(AuthContext);
+  const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

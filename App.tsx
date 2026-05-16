@@ -14,9 +14,16 @@ import { MyBookingsScreen } from './screens/MyBookingsScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import AdminDashboardScreen from './screens/AdminDashboardScreen';
 import AdminHotelsScreen from './screens/AdminHotelsScreen';
+import AdminHotelCreateScreen from './screens/AdminHotelCreateScreen';
+import AdminHotelDetailScreen from './screens/AdminHotelDetailScreen';
 import AdminBookingsScreen from './screens/AdminBookingsScreen';
 import AdminUsersScreen from './screens/AdminUsersScreen';
 import AdminReviewsScreen from './screens/AdminReviewsScreen';
+import AdminHotelSubmissionsScreen from './screens/AdminHotelSubmissionsScreen';
+import HotelSubmissionScreen from './screens/HotelSubmissionScreen';
+import OwnerBookingsScreen from './screens/OwnerBookingsScreen';
+import ChatListScreen from './screens/ChatListScreen';
+import ChatDetailScreen from './screens/ChatDetailScreen';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import type { RootStackParamList } from './types/navigation';
 
@@ -46,9 +53,12 @@ function RootNavigator() {
         <>
           <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
           <Stack.Screen name="AdminHotels" component={AdminHotelsScreen} />
+          <Stack.Screen name="AdminHotelCreate" component={AdminHotelCreateScreen} />
+          <Stack.Screen name="AdminHotelDetail" component={AdminHotelDetailScreen} />
           <Stack.Screen name="AdminBookings" component={AdminBookingsScreen} />
           <Stack.Screen name="AdminUsers" component={AdminUsersScreen} />
           <Stack.Screen name="AdminReviews" component={AdminReviewsScreen} />
+          <Stack.Screen name="AdminHotelSubmissions" component={AdminHotelSubmissionsScreen} />
         </>
       ) : (
         <>
@@ -59,6 +69,10 @@ function RootNavigator() {
           <Stack.Screen name="Confirmation" component={ConfirmationScreen} />
           <Stack.Screen name="MyBookings" component={MyBookingsScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="HotelSubmission" component={HotelSubmissionScreen} />
+          <Stack.Screen name="OwnerBookings" component={OwnerBookingsScreen} />
+          <Stack.Screen name="ChatList" component={ChatListScreen} />
+          <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
         </>
       )}
     </Stack.Navigator>

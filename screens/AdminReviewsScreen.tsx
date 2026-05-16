@@ -12,6 +12,7 @@ import { adminReviewAPI, AdminReviewDto } from '../services/api';
 
 const AdminReviewsScreen = () => {
   const [reviews, setReviews] = useState<AdminReviewDto[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +23,8 @@ const AdminReviewsScreen = () => {
     try {
       setLoading(true);
       const data = await adminReviewAPI.getAll();
-      setReviews(data);
+      setReviews(data.items);
+      setTotalCount(data.totalCount);
     } catch (error) {
       Alert.alert('Помилка', 'Не вдалося завантажити відгуки');
     } finally {
@@ -87,7 +89,7 @@ const AdminReviewsScreen = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Модерація відгуків</Text>
-        <Text style={styles.subtitle}>{reviews.length} відгуків</Text>
+        <Text style={styles.subtitle}>{totalCount} відгуків</Text>
       </View>
 
       <FlatList

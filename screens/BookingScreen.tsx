@@ -9,6 +9,7 @@ import {
   View,
   ActivityIndicator,
   Alert,
+  Modal,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { bookingAPI, CreateBookingRequest } from '../services/api';
@@ -20,10 +21,45 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Booking'>;
 export default function BookingScreen({ route, navigation }: Props) {
   const { hotel, room } = route.params;
   const { isAuthenticated } = useAuth();
-  const [checkIn, setCheckIn] = useState('2024-01-10');
-  const [checkOut, setCheckOut] = useState('2024-01-12');
+
+  const today = new Date().toISOString().split('T')[0];
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+  const [checkIn, setCheckIn] = useState(today);
+  const [checkOut, setCheckOut] = useState(tomorrow);
   const [guests, setGuests] = useState('2');
   const [isLoading, setIsLoading] = useState(false);
+
+  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+  const [selectingType, setSelectingType] = useState<'in' | 'out'>('in');
+
+  const handleDateSelect = (date: string) => {
+    if (selectingType === 'in') {
+      setCheckIn(date);
+      // Ensure checkout is at least next day
+      const nextDay = new Date(new Date(date).getTime() + 86400000).toISOString().split('T')[0];
+      if (checkOut <= date) {
+        setCheckOut(nextDay);
+      }
+    } else {
+      if (date <= checkIn) {
+        Alert.alert('Помилка', 'Дата виїзду має бути пізніше дати заїзду');
+        return;
+      }
+      setCheckOut(date);
+    }
+    setIsDatePickerVisible(false);
+  };
+
+  const generateDays = () => {
+    const days = [];
+    const now = new Date();
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(now.getTime() + i * 86400000);
+      days.push(d.toISOString().split('T')[0]);
+    }
+    return days;
+  };
 
   const handleBooking = async () => {
     if (!isAuthenticated) {
@@ -89,24 +125,22 @@ export default function BookingScreen({ route, navigation }: Props) {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Дата заселення</Text>
-          <TextInput
-            style={styles.input}
-            value={checkIn}
-            onChangeText={setCheckIn}
-            placeholder="YYYY-MM-DD"
-            editable={!isLoading}
-          />
+          <TouchableOpacity
+            style={styles.dateSelector}
+            onPress={() => { setSelectingType('in'); setIsDatePickerVisible(true); }}
+          >
+            <Text style={styles.dateText}>📅 {new Date(checkIn).toLocaleDateString('uk-UA')}</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Дата виселення</Text>
-          <TextInput
-            style={styles.input}
-            value={checkOut}
-            onChangeText={setCheckOut}
-            placeholder="YYYY-MM-DD"
-            editable={!isLoading}
-          />
+          <TouchableOpacity
+            style={styles.dateSelector}
+            onPress={() => { setSelectingType('out'); setIsDatePickerVisible(true); }}
+          >
+            <Text style={styles.dateText}>📅 {new Date(checkOut).toLocaleDateString('uk-UA')}</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
@@ -129,7 +163,7 @@ export default function BookingScreen({ route, navigation }: Props) {
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Дати:</Text>
             <Text style={styles.summaryValue}>
-              {nights} ночей
+              {nights} {nights === 1 ? 'ніч' : nights < 5 ? 'ночі' : 'ночей'}
             </Text>
           </View>
           <View style={styles.summaryRow}>
@@ -153,6 +187,37 @@ export default function BookingScreen({ route, navigation }: Props) {
             <Text style={styles.actionButtonText}>Підтвердити бронювання</Text>
           )}
         </TouchableOpacity>
+
+        {/* Date Picker Modal */}
+        <Modal
+          visible={isDatePickerVisible}
+          animationType="fade"
+          transparent={true}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.calendarCard}>
+              <Text style={styles.modalTitle}>
+                Виберіть дату {selectingType === 'in' ? 'заїзду' : 'виїзду'}
+              </Text>
+              <ScrollView style={styles.dateList}>
+                {generateDays().map((date) => (
+                  <TouchableOpacity
+                    key={date}
+                    style={[styles.dateItem, (selectingType === 'in' ? checkIn : checkOut) === date && styles.dateItemActive]}
+                    onPress={() => handleDateSelect(date)}
+                  >
+                    <Text style={[styles.dateItemText, (selectingType === 'in' ? checkIn : checkOut) === date && styles.dateItemTextActive]}>
+                      {new Date(date).toLocaleDateString('uk-UA', { weekday: 'short', day: 'numeric', month: 'long' })}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+              <TouchableOpacity style={styles.closeModalBtn} onPress={() => setIsDatePickerVisible(false)}>
+                <Text style={styles.closeModalText}>Закрити</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </SafeAreaView>
   );
@@ -286,5 +351,68 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     fontSize: 16,
+  },
+  dateSelector: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  dateText: {
+    fontSize: 16,
+    color: '#111827',
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  calendarCard: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    maxHeight: '70%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#111827',
+  },
+  dateList: {
+    marginBottom: 20,
+  },
+  dateItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  dateItemActive: {
+    backgroundColor: '#eff6ff',
+    borderRadius: 8,
+    borderBottomWidth: 0,
+  },
+  dateItemText: {
+    fontSize: 16,
+    color: '#334155',
+  },
+  dateItemTextActive: {
+    color: '#2563eb',
+    fontWeight: '700',
+  },
+  closeModalBtn: {
+    backgroundColor: '#f1f5f9',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  closeModalText: {
+    color: '#64748b',
+    fontWeight: '600',
   },
 });

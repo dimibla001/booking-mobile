@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { bookingAPI, BookingDto } from '../services/api';
+import { bookingAPI, BookingDto, chatAPI } from '../services/api';
 import type { RootStackParamList } from '../types/navigation';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -23,12 +23,17 @@ export const MyBookingsScreen: React.FC<Props> = ({ navigation }) => {
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigation.replace('Login');
-      return;
-    }
     loadBookings();
   }, []);
+
+  const startChat = async (bookingId: string, hotelName: string) => {
+    try {
+      const chat = await chatAPI.startChat(bookingId);
+      navigation.navigate('ChatDetail', { threadId: chat.id, title: hotelName });
+    } catch (e: any) {
+      Alert.alert('Помилка', 'Не вдалося почати чат: ' + e.message);
+    }
+  };
 
   const loadBookings = async () => {
     try {
@@ -51,10 +56,10 @@ export const MyBookingsScreen: React.FC<Props> = ({ navigation }) => {
         onPress: async () => {
           try {
             await bookingAPI.cancel(bookingId);
-            setBookings(bookings.filter((b) => b.id !== bookingId));
+            loadBookings();
             Alert.alert('Успіх', 'Бронювання скасовано');
           } catch (err: any) {
-            Alert.alert('Помилка', err.message);
+            Alert.alert('Помилка', err.message || 'Не вдалося скасувати бронювання');
           }
         },
       },
@@ -96,12 +101,21 @@ export const MyBookingsScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       </View>
 
-      <TouchableOpacity
-        onPress={() => handleCancel(item.id)}
-        style={styles.cancelButton}
-      >
-        <Text style={styles.cancelButtonText}>Скасувати бронювання</Text>
-      </TouchableOpacity>
+      <View style={styles.actions}>
+        <TouchableOpacity
+          onPress={() => startChat(item.id, item.hotelId)}
+          style={styles.chatActionBtn}
+        >
+          <Text style={styles.chatActionBtnText}>💬 Написати власнику</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => handleCancel(item.id)}
+          style={styles.cancelButton}
+        >
+          <Text style={styles.cancelButtonText}>Скасувати бронювання</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -266,11 +280,29 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   cancelButton: {
+    flex: 1,
     borderWidth: 1,
     borderColor: '#EF4444',
     borderRadius: 8,
     paddingVertical: 10,
     alignItems: 'center',
+  },
+  chatActionBtn: {
+    flex: 1,
+    backgroundColor: '#006ce4',
+    borderRadius: 8,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  chatActionBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 10,
   },
   cancelButtonText: {
     color: '#EF4444',

@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
   Alert,
+  Image,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
@@ -18,7 +19,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, isLoading, error, clearError } = useAuth();
+  const { login, loginWithGoogle, isLoading, error, clearError } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -29,7 +30,6 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
     try {
       clearError();
       await login(email, password);
-      navigation.replace('Home');
     } catch (err: any) {
       Alert.alert('Помилка входу', err.message);
     }

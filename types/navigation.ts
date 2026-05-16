@@ -1,10 +1,10 @@
-import { HotelDto, BookingDto, RoomDto } from '../services/api';
+import { HotelDto, BookingDto, RoomDto, HotelSearchParams } from '../services/api';
 
 export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   Home: undefined;
-  Results: { searchQuery?: string };
+  Results: { searchQuery?: string; filters?: HotelSearchParams };
   HotelDetail: { hotelId: string };
   Booking: { hotel: HotelDto; room: RoomDto };
   Confirmation: { booking: BookingDto };
@@ -17,4 +17,10 @@ export type RootStackParamList = {
   AdminBookings: undefined;
   AdminUsers: undefined;
   AdminReviews: undefined;
+  AdminHotelSubmissions: undefined;
+  HotelSubmission: undefined;
+  MySubmissions: undefined;
+  OwnerBookings: undefined;
+  ChatList: undefined;
+  ChatDetail: { threadId: string; title: string };
 };

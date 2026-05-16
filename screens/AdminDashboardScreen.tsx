@@ -23,17 +23,17 @@ const AdminDashboardScreen = ({ navigation }: any) => {
   const loadStats = async () => {
     try {
       setLoading(true);
-      const [hotels, bookings, users] = await Promise.all([
-        adminHotelAPI.getAll(),
-        adminBookingAPI.getAll(),
-        adminUserAPI.getAll(),
+      const [hotelsData, bookingsData, usersData] = await Promise.all([
+        adminHotelAPI.getAll(1, 100), // Get first 100 to have some data for filtering if needed, but totalCount is key
+        adminBookingAPI.getAll(1, 100),
+        adminUserAPI.getAll(1, 100),
       ]);
 
       setStats({
-        hotelsCount: hotels.length,
-        bookingsCount: bookings.length,
-        usersCount: users.length,
-        confirmedBookings: bookings.filter((b: any) => b.status === 'confirmed').length,
+        hotelsCount: hotelsData.totalCount,
+        bookingsCount: bookingsData.totalCount,
+        usersCount: usersData.totalCount,
+        confirmedBookings: bookingsData.items.filter((b: any) => b.status === 'confirmed').length, // This is still limited to first 100
       });
     } catch (error) {
       Alert.alert('Помилка', 'Не вдалося завантажити статистику');
@@ -133,6 +133,17 @@ const AdminDashboardScreen = ({ navigation }: any) => {
           <View style={styles.menuContent}>
             <Text style={styles.menuTitle}>Відгуки</Text>
             <Text style={styles.menuSubtitle}>Модерація відгуків про готелі</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => navigation.navigate('AdminHotelSubmissions')}
+        >
+          <Text style={styles.menuIcon}>📮</Text>
+          <View style={styles.menuContent}>
+            <Text style={styles.menuTitle}>Заявки на готелі</Text>
+            <Text style={styles.menuSubtitle}>Перегляд та схвалення нових готелів</Text>
           </View>
         </TouchableOpacity>
       </View>
